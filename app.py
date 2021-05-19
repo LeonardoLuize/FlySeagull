@@ -1,0 +1,228 @@
+import pygame, sys, random
+
+#Funções
+
+def drawFloor():
+    screen.blit(floorSurface, (floorXPosition,900))
+    screen.blit(floorSurface, (floorXPosition + 576, 900))
+
+def createPipe():
+    randomPipePosition = random.choice(pipeHeight)
+    bottomPipe = pipeSurface.get_rect(midtop = (700, randomPipePosition))
+    topPipe = pipeSurface.get_rect(midbottom = (700, randomPipePosition - 300))
+    return bottomPipe, topPipe
+
+#Movimenta os canos na tela
+def movePipes(pipes):
+    for pipe in pipes:
+        pipe.centerx -= 5
+    return pipes
+
+def drawPipes(pipes):
+    for pipe in pipes:
+        #   Verifica se a parte de baixo do cano passa de 1024, se passar ele só poderá ser o bottomPipe
+        #   então colocamos ele na tela normalmente
+        if pipe.bottom >= 1024:
+            screen.blit(pipeSurface, pipe)
+        else:
+            #   Caso não seja o bottomPipe será o topPipe, e precisamos rotacionar ele para que ele apareça
+            #   normalmente.
+            #   A função pygame.transform.flip() faz exatamente isso, nos passamos 3 parâmetros que são 
+            #   respectivamente o objeto que queremos dar o flip, se queremos dar o flip no eixo X 
+            #   e se queremos dar o flip no eixo Y
+            flipPipe = pygame.transform.flip(pipeSurface, False, True)
+            screen.blit(flipPipe, pipe)
+
+#   Verificando colisões com os canos, o teto e o chão
+def checkCollision(pipes):
+    for pipe in pipes:
+        if characterRectangle.colliderect(pipe):
+            deathSound.play()
+            return False
+        
+    if characterRectangle.top <= -100 or characterRectangle.bottom >= 900:
+        deathSound.play()
+        return False
+
+    return True
+
+def rotateCharacter(character):
+    newCharacter = pygame.transform.rotozoom(character, -characterMovement * 3, 1)
+    return newCharacter
+
+def characterAnimation():
+    newCharacter = characterFrames[characterIndex]
+    newCharacterRectangle = newCharacter.get_rect(center = (100, characterRectangle.centery))
+    return newCharacter, newCharacterRectangle
+
+def scoreDisplay(gameState):
+    if gameState == 'mainGame':
+        scoreSurface = gameFont.render(str(int(score)), True, (255, 255, 255))
+        scoreRectangle = scoreSurface.get_rect(center = (288, 100))
+        screen.blit(scoreSurface, scoreRectangle)
+    elif gameState == 'gameOver':
+        scoreSurface = gameFont.render(f'Score: {int(score)}', True, (255, 255, 255))
+        scoreRectangle = scoreSurface.get_rect(center = (288, 100))
+        screen.blit(scoreSurface, scoreRectangle)
+
+        highScoreSurface = gameFont.render(f'High Score: {int(highScore)}', True, (255, 255, 255))
+        highScoreRectangle = highScoreSurface.get_rect(center = (288, 850))
+        screen.blit(highScoreSurface, highScoreRectangle)
+
+def updateScore(score, highScore):
+    if score > highScore:
+        highScore = score
+    return highScore
+
+pygame.mixer.pre_init()
+#Inicio do jogo
+pygame.init()
+
+#   Configura um tamanho para tela semelhante ao size(576, 1024) do processing.
+screen = pygame.display.set_mode((576, 1024))
+#   Para controlar o Framerate/Fps do jogo chamamos pygame.time.Clock() e posteriormente clock.tick(120)
+#   É importante controlar o framerate para não atualizar mais que o necessário 
+clock = pygame.time.Clock()
+gameFont = pygame.font.Font('04B_19.ttf',40)
+
+#Variáveis do jogo
+gravity = 0.25
+characterMovement = 0
+gameActive = True
+highScore = 0
+score = 0
+
+
+#   Carregamento de imagem
+#   Parece que o .convert otimiza o processamento do pygame, mas não muda nada visualmente.
+bgSurface = pygame.image.load('./public/sprites/background-day.png').convert()
+#   Esta função basicamente duplica o tamanho da imagem e para salva-la colocamos ela em uma variavel.
+bgSurface = pygame.transform.scale2x(bgSurface)
+
+floorSurface = pygame.image.load('./public/sprites/base.png').convert()
+floorSurface = pygame.transform.scale2x(floorSurface)
+floorXPosition = 0
+
+#   Carregamos os frames das animações do personagem, e colocamos em um array para chamar 
+#   a imagem na hora certa. 
+characterDownFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/bluebird-downflap.png')).convert_alpha()
+characterMidFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/bluebird-midflap.png')).convert_alpha()
+characterUpFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/bluebird-upflap.png')).convert_alpha()
+characterFrames = [characterDownFlap, characterMidFlap, characterUpFlap]
+characterIndex = 0
+characterSprite = characterFrames[characterIndex]
+#   characterSprite.get_rect() faz com que a gente coloque um retângulo em volta do nosso personagem
+#   facilitando a verificação de colisões
+characterRectangle = characterSprite.get_rect(center = (100, 512))
+
+CHARACTERANIMATION = pygame.USEREVENT + 1
+pygame.time.set_timer(CHARACTERANIMATION, 200)
+
+""" characterSprite = pygame.image.load('./public/sprites/bluebird-midflap.png').convert_alpha()
+characterSprite = pygame.transform.scale2x(characterSprite)
+ """
+
+pipeSurface = pygame.image.load('./public/sprites/pipe-green.png')
+pipeSurface = pygame.transform.scale2x(pipeSurface)
+pipeList = []
+SPAWNPIPE = pygame.USEREVENT
+#Contador de tempo
+pygame.time.set_timer(SPAWNPIPE, 1200)
+pipeHeight = [400, 600, 800]
+
+gameOverSurface = pygame.image.load('./public/sprites/message.png').convert_alpha()
+gameOverSurface = pygame.transform.scale2x(gameOverSurface)
+gameOverRectangle = gameOverSurface.get_rect(center = (288, 512))
+
+flapSound = pygame.mixer.Sound('./public/audio/wing.wav')
+deathSound = pygame.mixer.Sound('./public/audio/hit.wav')
+scoreSound = pygame.mixer.Sound('./public/audio/point.wav')
+scoreSoundCountdown = 100
+
+#   Laço while para manter o jogo aberto, caso não tenha o while o jogo fecha rapidamente.
+while True:
+    #For verifica eventos do pygame
+    for event in pygame.event.get():
+        #   If para possibiltiar o fechamento do jogo.
+        #   Caso não tenha o if você não consegue fechar a janela do pygame.
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+        #   Depois que o contador chega ao final ele executa a ação dentro do if.
+        if event.type == SPAWNPIPE:
+            #   Acrescenta ao pipeList mais um cano, depois de 1,2 segundos(1200 ms)
+            pipeList.extend(createPipe())
+            
+        #   Verifica se uma tecla qualquer foi pressionada 
+        if event.type == pygame.KEYDOWN:
+            #   Verifica se uma tecla específica foi pressionada, no caso a
+            #   a tecla espaço
+            if event.key == pygame.K_SPACE and gameActive:
+                #   Mecânica de pulo do personagem
+                characterMovement = 0
+                characterMovement -= 11
+                flapSound.play()
+
+            if event.key == pygame.K_SPACE and gameActive == False:
+                gameActive = True
+                pipeList.clear()
+                characterRectangle.center = (100, 512)
+                characterMovement = 0
+                score = 0
+
+        if event.type == CHARACTERANIMATION:
+            if characterIndex < 2:
+                characterIndex += 1
+            else:
+                characterIndex = 0
+
+            characterSprite, characterRectangle = characterAnimation()
+       
+
+    #   Pelo que parece o .blit coloca um objeto em cima de outro.
+    #   Os argumentos passados para o .blit são primeiramente o objeto/imagem que você quer que 
+    #   ele coloque e posteriormente a posição (x, y) que ele será renderizado na tela.
+    screen.blit(bgSurface, (0,0))
+
+
+    if gameActive:
+        #   Aqui acrescentamos a "gravidade" para a variavel characterMovement, e em seguida
+        #   acrescentamos o valor de characterMovement para o eixo Y do retângulo que envolve
+        #   o personagem.
+        characterMovement += gravity
+        rotatedCharacter = rotateCharacter(characterSprite)
+        characterRectangle.centery += characterMovement
+        screen.blit(rotatedCharacter, characterRectangle)
+        
+        gameActive = checkCollision(pipeList)
+
+        pipeList = movePipes(pipeList)
+        drawPipes(pipeList)
+
+        score += 0.01
+        scoreDisplay('mainGame')
+        scoreSoundCountdown -= 1
+        if scoreSoundCountdown <= 0:
+            scoreSound.play()
+            scoreSoundCountdown = 100
+    else:
+        screen.blit(gameOverSurface, gameOverRectangle)
+        highScore = updateScore(score, highScore)
+        scoreDisplay('gameOver')
+
+
+    #   Incrementamos a variavel floorXPosition para dar um efeito de movimento no chão.
+    floorXPosition -= 1
+    #   Uma função que renderiza o chão duas vezes para um efeito de continuidade.
+    drawFloor()
+    #   Uma condição para que o chão se mantenha contínuo, como o width da tela é 576 quando 
+    #   floorXPosition chegar a um valor igual a -576 o primeiro chão renderizado vai chegar ao fim, então
+    #   igualamos o floorXPosition para 0, assim o chão volta e da um efeito de que o chão é infinito.
+    if floorXPosition <= -576:
+        floorXPosition = 0
+    
+
+    pygame.display.update()
+    #Aqui configuramos o máximo de fps, nesse caso 120.
+    clock.tick(120)

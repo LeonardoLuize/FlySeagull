@@ -89,6 +89,8 @@ def pipeScoreCheck():
                 canScore = False
             if pipe.centerx < 0:
                 canScore = True
+        if checkCollision(pipeList) == False:
+            canScore = True
 
 pygame.mixer.pre_init()
 #Inicio do jogo

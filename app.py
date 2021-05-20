@@ -16,7 +16,10 @@ def createPipe():
 def movePipes(pipes):
     for pipe in pipes:
         pipe.centerx -= 5
-    return pipes
+
+    visiblePipes = [pipe for pipe in pipes if pipe.right > -50]
+    
+    return visiblePipes
 
 def drawPipes(pipes):
     for pipe in pipes:
@@ -37,10 +40,12 @@ def drawPipes(pipes):
 def checkCollision(pipes):
     for pipe in pipes:
         if characterRectangle.colliderect(pipe):
+            canScore = True
             deathSound.play()
             return False
         
     if characterRectangle.top <= -100 or characterRectangle.bottom >= 900:
+        canScore = True
         deathSound.play()
         return False
 
@@ -61,18 +66,29 @@ def scoreDisplay(gameState):
         scoreRectangle = scoreSurface.get_rect(center = (288, 100))
         screen.blit(scoreSurface, scoreRectangle)
     elif gameState == 'gameOver':
-        scoreSurface = gameFont.render(f'Score: {int(score)}', True, (255, 255, 255))
-        scoreRectangle = scoreSurface.get_rect(center = (288, 100))
+        scoreSurface = gameFont.render(f'Score:    {int(score)}', True, (255, 255, 255))
+        scoreRectangle = scoreSurface.get_rect(center = (300, 460))
         screen.blit(scoreSurface, scoreRectangle)
 
-        highScoreSurface = gameFont.render(f'High Score: {int(highScore)}', True, (255, 255, 255))
-        highScoreRectangle = highScoreSurface.get_rect(center = (288, 850))
+        highScoreSurface = gameFont.render(f'High Score:    {int(highScore)}', True, (255, 255, 255))
+        highScoreRectangle = highScoreSurface.get_rect(center = (300, 560))
         screen.blit(highScoreSurface, highScoreRectangle)
 
 def updateScore(score, highScore):
     if score > highScore:
         highScore = score
     return highScore
+
+def pipeScoreCheck():
+    global score,canScore 
+    if pipeList:
+        for pipe in pipeList:
+            if 95 < pipe.centerx < 105 and canScore:
+                score += 1
+                scoreSound.play()
+                canScore = False
+            if pipe.centerx < 0:
+                canScore = True
 
 pygame.mixer.pre_init()
 #Inicio do jogo
@@ -89,8 +105,10 @@ gameFont = pygame.font.Font('04B_19.ttf',40)
 gravity = 0.25
 characterMovement = 0
 gameActive = True
+gameOverActive = False
 highScore = 0
 score = 0
+canScore = True
 
 
 #   Carregamento de imagem
@@ -134,6 +152,10 @@ gameOverSurface = pygame.image.load('./public/sprites/message.png').convert_alph
 gameOverSurface = pygame.transform.scale2x(gameOverSurface)
 gameOverRectangle = gameOverSurface.get_rect(center = (288, 512))
 
+scoreShow = pygame.image.load('./public/sprites/scoreScreen.png').convert_alpha()
+scoreShow = pygame.transform.scale2x(scoreShow)
+scoreShowRectangle = scoreShow.get_rect(center = (288, 512))
+
 flapSound = pygame.mixer.Sound('./public/audio/wing.wav')
 deathSound = pygame.mixer.Sound('./public/audio/hit.wav')
 scoreSound = pygame.mixer.Sound('./public/audio/point.wav')
@@ -164,12 +186,16 @@ while True:
                 characterMovement -= 11
                 flapSound.play()
 
-            if event.key == pygame.K_SPACE and gameActive == False:
+            if event.key == pygame.K_SPACE and gameActive == False and gameOverActive == True:
                 gameActive = True
+                gameOverActive = True
                 pipeList.clear()
                 characterRectangle.center = (100, 512)
                 characterMovement = 0
                 score = 0
+
+            if event.key == pygame.K_SPACE and gameOverActive == False:
+                gameOverActive = True
 
         if event.type == CHARACTERANIMATION:
             if characterIndex < 2:
@@ -196,20 +222,21 @@ while True:
         screen.blit(rotatedCharacter, characterRectangle)
         
         gameActive = checkCollision(pipeList)
+        gameOverActive = checkCollision(pipeList)
 
         pipeList = movePipes(pipeList)
         drawPipes(pipeList)
 
-        score += 0.01
+        pipeScoreCheck()
         scoreDisplay('mainGame')
-        scoreSoundCountdown -= 1
-        if scoreSoundCountdown <= 0:
-            scoreSound.play()
-            scoreSoundCountdown = 100
     else:
-        screen.blit(gameOverSurface, gameOverRectangle)
-        highScore = updateScore(score, highScore)
-        scoreDisplay('gameOver')
+        if gameOverActive == False:
+            screen.blit(scoreShow, scoreShowRectangle)
+            highScore = updateScore(score, highScore)
+            scoreDisplay('gameOver')
+        else:
+            screen.blit(gameOverSurface, gameOverRectangle)
+            highScore = updateScore(score, highScore)
 
 
     #   Incrementamos a variavel floorXPosition para dar um efeito de movimento no chão.

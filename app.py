@@ -114,7 +114,9 @@ canScore = True
 customizingCharacter = False
 customizeCharacterX = 288
 customizeCharacterIndex = 0
-
+character1 = True
+character2 = False
+character3 = False 
 
 #   Carregamento de imagem
 #   Parece que o .convert otimiza o processamento do pygame, mas não muda nada visualmente.
@@ -230,6 +232,40 @@ while True:
                 characterMovement = 0
                 score = 0
 
+                if character1:
+                    characterDownFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/bluebird-downflap.png')).convert_alpha()
+                    characterMidFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/bluebird-midflap.png')).convert_alpha()
+                    characterUpFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/bluebird-upflap.png')).convert_alpha()
+                    
+                    characterFrames.clear()
+                    characterFrames = [characterDownFlap, characterMidFlap, characterUpFlap]
+                    characterSprite = characterFrames[characterIndex]
+                    #   characterSprite.get_rect() faz com que a gente coloque um retângulo em volta do nosso personagem
+                    #   facilitando a verificação de colisões
+                    characterRectangle = characterSprite.get_rect(center = (100, 512))
+
+                elif character2:
+                    characterDownFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/redbird-downflap.png')).convert_alpha()
+                    characterMidFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/redbird-midflap.png')).convert_alpha()
+                    characterUpFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/redbird-upflap.png')).convert_alpha()
+                    characterFrames.clear()
+                    characterFrames = [characterDownFlap, characterMidFlap, characterUpFlap]
+                    characterSprite = characterFrames[characterIndex]
+                    #   characterSprite.get_rect() faz com que a gente coloque um retângulo em volta do nosso personagem
+                    #   facilitando a verificação de colisões
+                    characterRectangle = characterSprite.get_rect(center = (100, 512)) 
+                    
+                elif character3:
+                    characterDownFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/yellowbird-downflap.png')).convert_alpha()
+                    characterMidFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/yellowbird-midflap.png')).convert_alpha()
+                    characterUpFlap = pygame.transform.scale2x(pygame.image.load('./public/sprites/yellowbird-upflap.png')).convert_alpha()
+                    characterFrames.clear()
+                    characterFrames = [characterDownFlap, characterMidFlap, characterUpFlap]
+                    characterSprite = characterFrames[characterIndex]
+                    #   characterSprite.get_rect() faz com que a gente coloque um retângulo em volta do nosso personagem
+                    #   facilitando a verificação de colisões
+                    characterRectangle = characterSprite.get_rect(center = (100, 512)) 
+
             if event.key == pygame.K_SPACE and gameOverActive == False:
                 gameOverActive = True
 
@@ -274,12 +310,14 @@ while True:
     #   Os argumentos passados para o .blit são primeiramente o objeto/imagem que você quer que 
     #   ele coloque e posteriormente a posição (x, y) que ele será renderizado na tela.
     screen.blit(bgSurface, (0,0))
-
-
+ 
     if gameActive:
         #   Aqui acrescentamos a "gravidade" para a variavel characterMovement, e em seguida
         #   acrescentamos o valor de characterMovement para o eixo Y do retângulo que envolve
         #   o personagem.
+
+        
+
         characterMovement += gravity
         rotatedCharacter = rotateCharacter(characterSprite)
         characterRectangle.centery += characterMovement
@@ -303,12 +341,24 @@ while True:
             if customizeCharacterIndex == 0:
                 showBirdRectangle = characterShowBirdSprite.get_rect(center = (customizeCharacterX, 512))
                 screen.blit(characterShowBirdSprite, showBirdRectangle)
+
+                character1 = True
+                character2 = False
+                character3 = False
             elif customizeCharacterIndex == 1:
                 showRedBirdRectangle = characterShowRedBirdSprite.get_rect(center = (customizeCharacterX, 512))
                 screen.blit(characterShowRedBirdSprite, showRedBirdRectangle)
+
+                character1 = False
+                character2 = True 
+                character3 = False
             elif customizeCharacterIndex == 2:
                 showYellowBirdRectangle = characterShowYellowBirdSprite.get_rect(center = (customizeCharacterX, 512))
                 screen.blit(characterShowYellowBirdSprite, showYellowBirdRectangle)
+
+                character1 = False
+                character2 = False
+                character3 = True
             
 
 

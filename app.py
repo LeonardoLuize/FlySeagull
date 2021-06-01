@@ -106,11 +106,11 @@ gameFont = pygame.font.Font('04B_19.ttf',40)
 #Variáveis do jogo
 gravity = 0.25
 characterMovement = 0
-gameActive = True
-gameOverActive = False
+gameActive = False
+gameOverActive = True
 highScore = 0
 score = 0
-canScore = True
+canScore = False
 customizingCharacter = False
 customizeCharacterX = 288
 customizeCharacterIndex = 0

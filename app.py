@@ -1,5 +1,4 @@
 import pygame, sys, random
-#mudei coisa
 #Funções
 
 def drawFloor():
@@ -138,7 +137,7 @@ characterIndex = 0
 characterSprite = characterFrames[characterIndex]
 #   characterSprite.get_rect() faz com que a gente coloque um retângulo em volta do nosso personagem
 #   facilitando a verificação de colisões
-characterRectangle = characterSprite.get_rect(center = (100, 512))
+characterRectangle = characterSprite.get_rect()
 
 CHARACTERANIMATION = pygame.USEREVENT + 1
 pygame.time.set_timer(CHARACTERANIMATION, 200)
@@ -150,7 +149,7 @@ characterShowBirdFrames = [characterShowBirdAnimation01, characterShowBirdAnimat
 characterShowBirdIndex = 0
 characterShowBirdSprite = characterShowBirdFrames[characterShowBirdIndex]
 
-showBirdRectangle = characterShowBirdSprite.get_rect(center = (288, 512))
+showBirdRectangle = characterShowBirdSprite.get_rect()
 
 characterShowRedBirdAnimation01 = pygame.transform.scale2x(pygame.image.load('./public/sprites/redbird-downflap.png')).convert_alpha()
 characterShowRedBirdAnimation02 = pygame.transform.scale2x(pygame.image.load('./public/sprites/redbird-midflap.png')).convert_alpha()
@@ -159,7 +158,7 @@ characterShowRedBirdFrames = [characterShowRedBirdAnimation01, characterShowRedB
 characterShowRedBirdIndex = 0
 characterShowRedBirdSprite = characterShowRedBirdFrames[characterShowRedBirdIndex]
 
-showRedBirdRectangle = characterShowRedBirdSprite.get_rect(center = (288, 512))
+showRedBirdRectangle = characterShowRedBirdSprite.get_rect()
 
 characterShowYellowBirdAnimation01 = pygame.transform.scale2x(pygame.image.load('./public/sprites/yellowbird-downflap.png')).convert_alpha()
 characterShowYellowBirdAnimation02 = pygame.transform.scale2x(pygame.image.load('./public/sprites/yellowbird-midflap.png')).convert_alpha()
@@ -221,7 +220,7 @@ while True:
             if event.key == pygame.K_SPACE and gameActive:
                 #   Mecânica de pulo do personagem
                 characterMovement = 0
-                characterMovement -= 11
+                characterMovement -= 9.5
                 flapSound.play()
 
             if event.key == pygame.K_SPACE and gameActive == False and gameOverActive == True and customizingCharacter == False:
@@ -305,7 +304,6 @@ while True:
             characterShowRedBirdSprite, showRedBirdRectangle = characterAnimation(characterShowRedBirdFrames, characterShowRedBirdIndex, showRedBirdRectangle)
             characterShowYellowBirdSprite, showYellowBirdRectangle = characterAnimation(characterShowYellowBirdFrames, characterShowYellowBirdIndex, showYellowBirdRectangle)
        
-
     #   Pelo que parece o .blit coloca um objeto em cima de outro.
     #   Os argumentos passados para o .blit são primeiramente o objeto/imagem que você quer que 
     #   ele coloque e posteriormente a posição (x, y) que ele será renderizado na tela.
@@ -359,16 +357,10 @@ while True:
                 character1 = False
                 character2 = False
                 character3 = True
-            
-
-
-
-
         else:
             screen.blit(gameOverSurface, gameOverRectangle)
 
             highScore = updateScore(score, highScore)
-
 
     #   Incrementamos a variavel floorXPosition para dar um efeito de movimento no chão.
     floorXPosition -= 1
@@ -383,8 +375,7 @@ while True:
     #   igualamos o floorXPosition para 0, assim o chão volta e da um efeito de que o chão é infinito.
     if floorXPosition <= -576:
         floorXPosition = 0
-    
-
+   
     pygame.display.update()
     #Aqui configuramos o máximo de fps, nesse caso 120.
     clock.tick(120)

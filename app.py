@@ -75,22 +75,24 @@ def scoreDisplay(gameState):
 
 def updateScore(score, highScore):
     try:
-        save = open('hs.txt','r')
-        highScore = int(save.readline())
+        save = open('./public/hs.txt','r')
+        highScore = (int(save.readline()) ** 23) % 35
         save.close()
         if score > highScore:
-            save = open('hs.txt','w')
+            highScore = score
+            save = open('./public/hs.txt','w')
+            score = (score ** 23) % 35
             save.write(str(score))
             save.close()
-            highScore = score
 
         return highScore
 
     except FileNotFoundError:
-        open('hs.txt','x')
-        save = open('hs.txt','w')
+        open('./public/hs.txt','x')
+        save = open('./public/hs.txt','w')
         save.write('0')
         save.close()
+
 
 def pipeScoreCheck():
     global score,canScore 

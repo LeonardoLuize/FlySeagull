@@ -74,9 +74,23 @@ def scoreDisplay(gameState):
         screen.blit(highScoreSurface, highScoreRectangle)
 
 def updateScore(score, highScore):
-    if score > highScore:
-        highScore = score
-    return highScore
+    try:
+        save = open('hs.txt','r')
+        highScore = int(save.readline())
+        save.close()
+        if score > highScore:
+            save = open('hs.txt','w')
+            save.write(str(score))
+            save.close()
+            highScore = score
+
+        return highScore
+
+    except FileNotFoundError:
+        open('hs.txt','x')
+        save = open('hs.txt','w')
+        save.write('0')
+        save.close()
 
 def pipeScoreCheck():
     global score,canScore 

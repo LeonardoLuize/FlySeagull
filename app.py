@@ -76,12 +76,12 @@ def scoreDisplay(gameState):
 def updateScore(score, highScore):
     try:
         save = open('./public/hs.txt','r')
-        highScore = (int(save.readline()) ** 23) % 35
-        save.close()
-        if score > highScore:
-            highScore = score
+        highScore = (int(save.readline()) ** 30307) % 425647 #privada
+        save.close() #link de ajuda: https://www.comparitech.com/blog/information-security/rsa-encryption/
+        if score > highScore: #amém à quem me ajudou fazendo esse site e colocando
+            highScore = score #coisa de RSA
             save = open('./public/hs.txt','w')
-            score = (score ** 23) % 35
+            score = (score ** 7) % 425647#publica
             save.write(str(score))
             save.close()
 

@@ -255,7 +255,7 @@ while True:
             if (event.key == pygame.K_SPACE and gameActive):
                 #   Mecânica de pulo do personagem
                 characterMovement = 0
-                characterMovement -= 9.5
+                characterMovement -= 10
                 flapSound.play()
 
             if event.key == pygame.K_SPACE and gameActive == False and gameOverActive == True and customizingCharacter == False:

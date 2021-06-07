@@ -7,11 +7,9 @@ def bot():
         for pipe in pipeList:
             if(loop == 1): #sendo loop == impar, na teoria o cano que está sendo olhado é o de cima
                 if(characterRectangle.top>pipe.top-100 and characterRectangle.left<pipe.right): #cano de baixo
-                    print("cano")
                     return True
             loop += 1
         if(characterRectangle.bottom>=800): #chão da morte
-            print("chão da morte")
             return True
         return False
 

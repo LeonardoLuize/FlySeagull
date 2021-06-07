@@ -215,7 +215,7 @@ pipeList = []
 SPAWNPIPE = pygame.USEREVENT
 #Contador de tempo
 pygame.time.set_timer(SPAWNPIPE, 1200)
-pipeHeight = [400, 600, 800]
+pipeHeight = [400, 500, 600, 700, 800, 900] #valores possiveis onde os canos podem aparecer
 
 gameOverSurface = pygame.image.load('./public/sprites/message.png').convert_alpha()
 gameOverSurface = pygame.transform.scale2x(gameOverSurface)

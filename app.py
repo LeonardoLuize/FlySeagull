@@ -1,15 +1,14 @@
 import pygame, sys, random
 #Funções
-
 def bot():
     if(gameActive and botOn):
         loop = 1
         for pipe in pipeList:
             if(loop == 1): #sendo loop == impar, na teoria o cano que está sendo olhado é o de cima
-                if(characterRectangle.top>pipe.top-100 and characterRectangle.left<pipe.right): #cano de baixo
-                    return True
+                if(characterRectangle.top>pipe.top-70 and characterRectangle.left<pipe.right): #cano de baixo
+                    return True #+30 para cada .5 unidades de modificadorDePulo
             loop += 1
-        if(characterRectangle.bottom>=800): #chão da morte
+        if(characterRectangle.bottom>=870): #chão da morte
             return True
         return False
 
@@ -138,6 +137,7 @@ gameFont = pygame.font.Font('04B_19.ttf',40)
 #Variáveis do jogo
 gravity = 0.25
 characterMovement = 0
+modificadorDePulo = 10 #a quantidade de unidades recebidas por pulo
 gameActive = False
 gameOverActive = True
 highScore = 0
@@ -255,7 +255,7 @@ while True:
             if (event.key == pygame.K_SPACE and gameActive):
                 #   Mecânica de pulo do personagem
                 characterMovement = 0
-                characterMovement -= 10
+                characterMovement -= modificadorDePulo
                 flapSound.play()
 
             if event.key == pygame.K_SPACE and gameActive == False and gameOverActive == True and customizingCharacter == False:
@@ -354,7 +354,7 @@ while True:
     if gameActive:
         if (bot() and botOn and gameActive):
             characterMovement = 0
-            characterMovement -= 9.5 
+            characterMovement -= modificadorDePulo
             flapSound.play()
         #   Aqui acrescentamos a "gravidade" para a variavel characterMovement, e em seguida
         #   acrescentamos o valor de characterMovement para o eixo Y do retângulo que envolve

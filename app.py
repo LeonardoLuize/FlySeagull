@@ -1,6 +1,20 @@
 import pygame, sys, random
 #Funções
 
+def bot():
+    if(gameActive and botOn):
+        loop = 1
+        for pipe in pipeList:
+            if(loop == 1): #sendo loop == impar, na teoria o cano que está sendo olhado é o de cima
+                if(characterRectangle.top>pipe.top-100 and characterRectangle.left<pipe.right): #cano de baixo
+                    print("cano")
+                    return True
+            loop += 1
+        if(characterRectangle.bottom>=800): #chão da morte
+            print("chão da morte")
+            return True
+        return False
+
 def drawFloor():
     screen.blit(floorSurface, (floorXPosition,900))
     screen.blit(floorSurface, (floorXPosition + 576, 900))
@@ -38,16 +52,22 @@ def drawPipes(pipes):
 #   Verificando colisões com os canos, o teto e o chão
 def checkCollision(pipes):
     for pipe in pipes:
-        if characterRectangle.colliderect(pipe):
+        if characterRectangle.colliderect(pipe): 
+            '''
+            print('pipe bot',pipe.bottom)
+            print('pipe top',pipe.top)
+            print('player top',characterRectangle.top)
+            print('player bot',characterRectangle.bottom)
+            print
+            '''
             canScore = True
             deathSound.play()
             return False
         
-    if characterRectangle.top <= -100 or characterRectangle.bottom >= 900:
+    if characterRectangle.top <= -100 or characterRectangle.bottom >= 900: #-100 = chao e 900 = teto
         canScore = True
         deathSound.play()
         return False
-
     return True
 
 def rotateCharacter(character):
@@ -77,14 +97,13 @@ def updateScore(score, highScore):
     try:
         save = open('./public/hs.txt','r')
         highScore = (int(save.readline()) ** 30307) % 425647 #privada
-        save.close() #link de ajuda: https://www.comparitech.com/blog/information-security/rsa-encryption/
+        save.close() #https://www.comparitech.com/blog/information-security/rsa-encryption/
         if score > highScore: #amém à quem me ajudou fazendo esse site e colocando
             highScore = score #coisa de RSA
             save = open('./public/hs.txt','w')
             score = (score ** 7) % 425647#publica
             save.write(str(score))
             save.close()
-
         return highScore
 
     except FileNotFoundError:
@@ -92,7 +111,7 @@ def updateScore(score, highScore):
         save = open('./public/hs.txt','w')
         save.write('0')
         save.close()
-
+        updateScore(score, highScore)
 
 def pipeScoreCheck():
     global score,canScore 
@@ -126,6 +145,7 @@ gameOverActive = True
 highScore = 0
 score = 0
 canScore = False
+botOn = False
 customizingCharacter = False
 customizeCharacterX = 288
 customizeCharacterIndex = 0
@@ -186,7 +206,8 @@ characterShowYellowBirdSprite = characterShowYellowBirdFrames[characterShowYello
 showYellowBirdRectangle = characterShowYellowBirdSprite.get_rect(center = (288, 512))
 
 
-""" characterSprite = pygame.image.load('./public/sprites/bluebird-midflap.png').convert_alpha()
+""" 
+characterSprite = pygame.image.load('./public/sprites/bluebird-midflap.png').convert_alpha()
 characterSprite = pygame.transform.scale2x(characterSprite)
  """
 
@@ -226,14 +247,14 @@ while True:
 
         #   Depois que o contador chega ao final ele executa a ação dentro do if.
         if event.type == SPAWNPIPE:
-            #   Acrescenta ao pipeList mais um cano, depois de 1,2 segundos(1200 ms)
+            #   Acrescenta ao pipeList mais um cano, depois de 1.2 segundos(1200 ms)
             pipeList.extend(createPipe())
-            
-        #   Verifica se uma tecla qualquer foi pressionada 
-        if event.type == pygame.KEYDOWN:
+
+        if (event.type == pygame.KEYDOWN):
             #   Verifica se uma tecla específica foi pressionada, no caso a
             #   a tecla espaço
-            if event.key == pygame.K_SPACE and gameActive:
+
+            if (event.key == pygame.K_SPACE and gameActive):
                 #   Mecânica de pulo do personagem
                 characterMovement = 0
                 characterMovement -= 9.5
@@ -301,7 +322,14 @@ while True:
                     customizeCharacterIndex -= 1
                 else: 
                     customizeCharacterIndex = 2
-                
+            
+            if event.key == pygame.K_UP:
+                if (botOn):
+                    botOn = False
+                    print('bot =',botOn)
+                else:
+                    botOn = True
+                    print('bot =',botOn)
 
         if event.type == CHARACTERANIMATION:
             if characterIndex < 2:
@@ -326,11 +354,13 @@ while True:
     screen.blit(bgSurface, (0,0))
  
     if gameActive:
+        if (bot() and botOn and gameActive):
+            characterMovement = 0
+            characterMovement -= 9.5 
+            flapSound.play()
         #   Aqui acrescentamos a "gravidade" para a variavel characterMovement, e em seguida
         #   acrescentamos o valor de characterMovement para o eixo Y do retângulo que envolve
         #   o personagem.
-
-        
 
         characterMovement += gravity
         rotatedCharacter = rotateCharacter(characterSprite)

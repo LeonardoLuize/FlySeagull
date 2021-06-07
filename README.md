@@ -6,4 +6,4 @@ O objetivo é fazer uma reprodução do famoso jogo [Flappy Bird](https://www.go
 
 Nosso diferencial inclui customização de ~~cenário, roupas e~~ personagem, e um bot que joga o jogo sozinho
 
-O recorde atual do bot é de 1606
+O recorde atual do bot é de 1606 pontos
